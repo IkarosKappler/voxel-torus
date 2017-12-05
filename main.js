@@ -10,10 +10,6 @@
 
       // This function builds the voxels
       function mkVoxelTorus( material ) {
-            var minorRadius = 25;
-            var majorRadius = 75;
-            var raster      =  8; 
-
             // Found at:
             //    https://stackoverflow.com/questions/13460711/given-origin-and-radii-how-to-find-out-if-px-y-z-is-inside-torus
             //
@@ -27,25 +23,30 @@
             // Create the cube from the geometry and the material ...
             var torus = new THREE.Mesh(geometry, material); 
 
+	    var minorRadius = 25;
+            var majorRadius = 75;
+            var raster      =  8;
             var bounds = new THREE.Box3( 
                   new THREE.Vector3( -majorRadius-minorRadius, -majorRadius-minorRadius, -majorRadius-minorRadius ),
                   new THREE.Vector3(  majorRadius+minorRadius,  majorRadius+minorRadius,  majorRadius+minorRadius )
-                  );
+            );
+	    // Iterate through all {x,y,z} that are possible voxel centers given by the raster
             for( var x = bounds.min.x + raster/2; x < bounds.max.x+raster/2; x+= raster ) {
                   var xPow = x*x;
                   for( var y = bounds.min.y + raster/2; y < bounds.max.y+raster/2; y+= raster ) {
-                        var yPow = y*y;
-                        for( var z = bounds.min.z + raster/2; z < bounds.max.z+raster/2; z+= raster ) {
+                      var yPow = y*y;
+                      for( var z = bounds.min.z + raster/2; z < bounds.max.z+raster/2; z+= raster ) {
+		 	      // This term is smaller than zero if the point is inside the torus
                               if( Math.pow(x*x+y*y+z*z+Math.pow(majorRadius,2)-Math.pow(minorRadius,2),2)-4*Math.pow(majorRadius,2)*(x*x+y*y) > 0 )
                                     continue;
-                              // Add a voxel at {x,y,z}
-                              // Create a geometry conaining the logical 3D information (here: a cube)
+                              // Add a voxel at {x,y,z} (a cube)
                               var voxelGeometry = new THREE.CubeGeometry(raster,raster,raster); 
                               
                               // Create the cube from the geometry and the material ...
                               var voxel = new THREE.Mesh(voxelGeometry, material); 
-                            voxel.position.set( x, y, z );
+                              voxel.position.set( x, y, z );
 
+			      // Add to the torus
                               torus.children.push( voxel );
                         }
                   }     
