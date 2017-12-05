@@ -1,17 +1,17 @@
       /**
-       * Example for a basic THREE.js scene setup.
+       * Example for creating a voxel torus.
        * 
        * @author  Ikaros Kappler
-       * @date    2015-11-09
+       * @date    2017-12-05
        * @version 1.0.0
        **/
 
 (function() {
 
       function mkVoxelTorus() {
-            var minorRadius = 50;
-            var majorRadius = 150;
-            var raster      =  16; 
+            var minorRadius = 25;
+            var majorRadius = 75;
+            var raster      =  8; 
 
             // Found at:
             //    https://stackoverflow.com/questions/13460711/given-origin-and-radii-how-to-find-out-if-px-y-z-is-inside-torus
@@ -43,9 +43,6 @@
                               // Add a voxel at {x,y,z}
                               // Create a geometry conaining the logical 3D information (here: a cube)
                               var voxelGeometry = new THREE.CubeGeometry(raster,raster,raster); 
-
-                              // Pick a material, something like MeshBasicMaterial, PhongMaterial, 
-                              var material = new THREE.MeshPhongMaterial({color: 0x00ff00}); 
                               
                               // Create the cube from the geometry and the material ...
                               var voxel = new THREE.Mesh(voxelGeometry, material); 
@@ -72,7 +69,7 @@
             // to pass an existing canvas for rendering).
             this.renderer = new THREE.WebGLRenderer( { antialias : true } ); 
             this.renderer.setSize( window.innerWidth, 
-            window.innerHeight
+				   window.innerHeight
             ); 
 
             // ... and append it to the DOM
@@ -90,15 +87,9 @@
             //cube.position.set( 12, 12, 12 );
 
             // ... and add it to your scene.
-            this.scene.add(cube); 
+            this.scene.add(cube);
 
-            var torus = mkVoxelTorus();
-            torus.position.set( -12, -12, -12 );
-            torus.rotation.x = Math.PI/2;
-            torus.rotation.y = Math.PI/2;
-            torus.rotation.z = Math.PI/2;
-            this.scene.add( torus );
-
+	    // In this version the voxel torus is generates asynchronously. Look below.
 
             // Add some light
             this.pointLight = new THREE.PointLight(0xFFFFFF);
@@ -162,6 +153,16 @@
             // that here, because the animation shall run forever).
             this._render();
 
+	    window.setTimeout( function() {
+		// Compute the torus asynchronously
+		var torus = mkVoxelTorus();
+		torus.position.set( -12, -12, -12 );
+		torus.rotation.x = Math.PI/2;
+		torus.rotation.y = Math.PI/2;
+		torus.rotation.z = Math.PI/2;
+		scene.add( torus );
+		document.getElementById('overlay').style.display = 'none';
+	    }, 200 );
       } // END function init
 
       window.addEventListener('load', init );
