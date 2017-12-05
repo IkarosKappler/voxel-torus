@@ -17,6 +17,8 @@ Thanks to Giles Coope:
 
 ![Voxel Torus Screenshot](screenshot_3d.png)
 
+![Voxel Torus Screenshot Textured](screenshot_3d_textured.png)
+
 ![Voxel Torus Code](screenshot_code.png)
 
 

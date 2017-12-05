@@ -8,7 +8,8 @@
 
 (function() {
 
-      function mkVoxelTorus() {
+      // This function builds the voxels
+      function mkVoxelTorus( material ) {
             var minorRadius = 25;
             var majorRadius = 75;
             var raster      =  8; 
@@ -19,9 +20,6 @@
             //    From my calculation you must test the sign of the expression
             //    (x^2+y^2+z^2+a^2-b^2)^2-4a^2(x^2+y^2)
             //    where the point is {x,y,z} and the minor radius of the torus is b, and the major radius a.
-
-            // Pick a material, something like MeshBasicMaterial, PhongMaterial, 
-            var material = new THREE.MeshPhongMaterial({color: 0x00ff00}); 
 
             // Create a geometry conaining the logical 3D information (here: a cube)
             var geometry = new THREE.Geometry(); // empty
@@ -46,7 +44,7 @@
                               
                               // Create the cube from the geometry and the material ...
                               var voxel = new THREE.Mesh(voxelGeometry, material); 
-                              voxel.position.set( x, y, z );
+                            voxel.position.set( x, y, z );
 
                               torus.children.push( voxel );
                         }
@@ -84,7 +82,6 @@
             
             // Create the cube from the geometry and the material ...
             var cube = new THREE.Mesh(geometry, material); 
-            //cube.position.set( 12, 12, 12 );
 
             // ... and add it to your scene.
             this.scene.add(cube);
@@ -93,16 +90,9 @@
 
             // Add some light
             this.pointLight = new THREE.PointLight(0xFFFFFF);
-            //this.pointLight = new THREE.AmbientLight(0xFFFFFF);
-
-            // set its position
-            this.pointLight.position.x = 10;
-            this.pointLight.position.y = 50;
-            this.pointLight.position.z = 130;
 
             // add to the scene
             this.scene.add( this.pointLight );
-
 
             // Add grid helper
             var gridHelper = new THREE.GridHelper( 90, 9 );
@@ -120,16 +110,15 @@
             this.camera.position.set( 75, 75, 75 );
             // And look at the cube again
             this.camera.lookAt( cube.position );
+	    this.camera.add( this.pointLight );
+	    // Add the camera to the scene, too (it contains the lighting)
+	    this.scene.add( this.camera );
 
 
             // Finally we want to be able to rotate the whole scene with the mouse: 
             // add an orbit control helper.
             var _self = this;
             this.orbitControls = new THREE.OrbitControls( this.camera, this.renderer.domElement ); 
-            // Always move the point light with the camera. Looks much better ;)
-            this.orbitControls.addEventListener( 'change', 
-                  function() { _self.pointLight.position.copy(_self.camera.position); } 
-            );
             this.orbitControls.enableDamping = true;
             this.orbitControls.dampingFactor = 1.0;
             this.orbitControls.enableZoom    = true;
@@ -145,7 +134,7 @@
                   
                   // Let's animate the cube: a rotation.
                   cube.rotation.x += 0.05; 
-                  cube.rotation.y += 0.04; 
+                  cube.rotation.y += 0.04;
 
                   this.renderer.render(this.scene, this.camera); 
             }; 
@@ -153,16 +142,22 @@
             // that here, because the animation shall run forever).
             this._render();
 
-	    window.setTimeout( function() {
-		// Compute the torus asynchronously
-		var torus = mkVoxelTorus();
-		torus.position.set( -12, -12, -12 );
-		torus.rotation.x = Math.PI/2;
-		torus.rotation.y = Math.PI/2;
-		torus.rotation.z = Math.PI/2;
-		scene.add( torus );
-		document.getElementById('overlay').style.display = 'none';
-	    }, 200 );
+	  
+	    // Load a texture and use the loade for asyn creating of the torus
+	    new THREE.TextureLoader().load( 'square-gradient.png',
+		function ( texture ) {
+		    var material = new THREE.MeshPhongMaterial({color: 0x00ff00, map : texture}); 
+		    // Compute the torus asynchronously
+		    torus = mkVoxelTorus( material );
+		    scene.add( torus );
+		    // Hide overlay
+		    document.getElementById('overlay').style.display = 'none';
+		},
+		// Function called when download errors
+		function ( xhr ) {
+		    console.error( 'An error happened loading the texture' );
+		}
+	     );
       } // END function init
 
       window.addEventListener('load', init );
