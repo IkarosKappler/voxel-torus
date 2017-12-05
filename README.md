@@ -5,7 +5,7 @@ This is my 15 minute voxel torus implementation.
 I used my threejs basic scene setup which you can find here:
 http://www.int2byte.de/public/blog.20160129_Three.js_Basic_Scene_Setup
 
-This implementation uses the wonder point-in-torus-test I found at:
+This implementation uses the wonderful point-in-torus-test I discovered at:
 https://stackoverflow.com/questions/13460711/given-origin-and-radii-how-to-find-out-if-px-y-z-is-inside-torus
 Thanks to Giles Coope:
 
