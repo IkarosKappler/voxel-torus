@@ -9,7 +9,7 @@
 (function() {
 
       // This function builds the voxels
-      function mkVoxelTorus( material ) {
+      function mkVoxelTorus( materialFactory ) {
             // Found at:
             //    https://stackoverflow.com/questions/13460711/given-origin-and-radii-how-to-find-out-if-px-y-z-is-inside-torus
             //
@@ -21,16 +21,16 @@
             var geometry = new THREE.Geometry(); // empty
             
             // Create the cube from the geometry and the material ...
-            var torus = new THREE.Mesh(geometry, material); 
+            var torus = new THREE.Mesh(geometry, materialFactory()); 
 
-	    var minorRadius = 25;
+	      var minorRadius = 25;
             var majorRadius = 75;
             var raster      =  8;
             var bounds = new THREE.Box3( 
                   new THREE.Vector3( -majorRadius-minorRadius, -majorRadius-minorRadius, -majorRadius-minorRadius ),
                   new THREE.Vector3(  majorRadius+minorRadius,  majorRadius+minorRadius,  majorRadius+minorRadius )
             );
-	    // Iterate through all {x,y,z} that are possible voxel centers given by the raster
+	      // Iterate through all {x,y,z} that are possible voxel centers given by the raster
             for( var x = bounds.min.x + raster/2; x < bounds.max.x+raster/2; x+= raster ) {
                   var xPow = x*x;
                   for( var y = bounds.min.y + raster/2; y < bounds.max.y+raster/2; y+= raster ) {
@@ -43,7 +43,7 @@
                               var voxelGeometry = new THREE.CubeGeometry(raster,raster,raster); 
                               
                               // Create the cube from the geometry and the material ...
-                              var voxel = new THREE.Mesh(voxelGeometry, material); 
+                              var voxel = new THREE.Mesh(voxelGeometry, materialFactory()); 
                               voxel.position.set( x, y, z );
 
 			      // Add to the torus
@@ -148,9 +148,16 @@
 	    // Load a texture and use the loade for asyn creating of the torus
 	    new THREE.TextureLoader().load( 'square-gradient.png',
 		function ( texture ) {
-		    var material = new THREE.MeshPhongMaterial({color: 0x00ff00, map : texture}); 
+                // Use single color for all voxels or randomize?
+                var material = new THREE.MeshPhongMaterial( { color: 0x00ff00, map : texture } );
+                var materialFactory = null;
+                console.log( window.location.search.indexOf('colors=1') );
+                if( window.location.search.indexOf('colors=1') != -1 ) 
+                  materialFactory = function() { return new THREE.MeshPhongMaterial({color: Math.random()*0xFFFFFF, map : texture}); };
+		    else 
+                  materialFactory = function() { return material; }; 
 		    // Compute the torus asynchronously
-		    torus = mkVoxelTorus( material );
+		    torus = mkVoxelTorus( materialFactory );
 		    scene.add( torus );
 		    // Hide overlay
 		    document.getElementById('overlay').style.display = 'none';
