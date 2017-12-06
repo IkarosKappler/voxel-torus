@@ -111,9 +111,9 @@
             this.camera.position.set( 75, 75, 75 );
             // And look at the cube again
             this.camera.lookAt( cube.position );
-	    this.camera.add( this.pointLight );
-	    // Add the camera to the scene, too (it contains the lighting)
-	    this.scene.add( this.camera );
+	      this.camera.add( this.pointLight );
+	      // Add the camera to the scene, too (it contains the lighting)
+	      this.scene.add( this.camera );
 
 
             // Finally we want to be able to rotate the whole scene with the mouse: 
@@ -129,15 +129,16 @@
 
             // This is the basic render function. It will be called perpetual, again and again,
             // depending on your machines possible frame rate.
+            var _self = this;  // workaround for the Safari requestAnimationFrame bug.
             this._render = function () { 
                   // Pass the render function itself
-                  requestAnimationFrame(this._render); 
+                  requestAnimationFrame(_self._render); 
                   
                   // Let's animate the cube: a rotation.
                   cube.rotation.x += 0.05; 
                   cube.rotation.y += 0.04;
 
-                  this.renderer.render(this.scene, this.camera); 
+                  _self.renderer.render(_self.scene, _self.camera); 
             }; 
             // Call the rendering function. This will cause and infinite recursion (we want 
             // that here, because the animation shall run forever).
@@ -154,9 +155,11 @@
 		    // Hide overlay
 		    document.getElementById('overlay').style.display = 'none';
 		},
+            function ( xhr ) { }, // progress
 		// Function called when download errors
 		function ( xhr ) {
-		    console.error( 'An error happened loading the texture' );
+		    console.error( 'An error happened when loading the texture' );
+                document.getElementById('overlay').innerHTML = 'An error happened when loading the texture';
 		}
 	     );
       } // END function init

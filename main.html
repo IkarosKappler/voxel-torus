@@ -3,7 +3,7 @@
     <title>Creating a voxel torus</title> 
     <style>
       html, body { padding: 0; margin : 0 }
-      canvas { width: 100%; height: 100% }
+      canvas { width: 100%; height: 100%; position : absolute; left : 0px; top : 0px; }
       #overlay { width : 100%; height : 100vh; background-color : rgba(0,0,0,0.5); color : white; position : absolute; left : 0px; top : 0px; padding-top : 49%; text-align: center; font-size: 16pt; }
     </style> 
   </head>
@@ -11,6 +11,7 @@
   <body> 
     <script language="Javascript" type="text/javascript" src="lib/three.r88.min.js"></script>
     <script language="Javascript" type="text/javascript" src="lib/OrbitControls.js"></script>
+    <script src="rAF.polyfill.js"></script>
     <script src="main.js"></script>
     <div id="overlay">Loading texture and generating voxels ...</div>
   </body> 
