@@ -37,7 +37,7 @@
                       var yPow = y*y;
                       for( var z = bounds.min.z + raster/2; z < bounds.max.z+raster/2; z+= raster ) {
 		 	      // This term is smaller than zero if the point is inside the torus
-                              if( Math.pow(x*x+y*y+z*z+Math.pow(majorRadius,2)-Math.pow(minorRadius,2),2)-4*Math.pow(majorRadius,2)*(x*x+y*y) > 0 )
+                              if( Math.pow(xPow+yPow+z*z+Math.pow(majorRadius,2)-Math.pow(minorRadius,2),2)-4*Math.pow(majorRadius,2)*(xPow+yPow) > 0 )
                                     continue;
                               // Add a voxel at {x,y,z} (a cube)
                               var voxelGeometry = new THREE.CubeGeometry(raster,raster,raster); 
