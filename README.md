@@ -23,5 +23,7 @@ Thanks to Giles Coope:
 
 ![Voxel Torus Screenshot multicolored](screenshot_3d_colors.png)
 
+![Voxel Torus Screenshot tween](screenshot_3d_tweening.png)
+
 
 Find a live demo here: http://www.int2byte.de/public/voxel-torus/

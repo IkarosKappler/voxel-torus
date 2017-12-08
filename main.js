@@ -8,6 +8,8 @@
 
 (function() {
 
+    var tweenPool = [];
+
     // This function builds the voxels
     function mkVoxelTorus( materialFactory, voxelAdded ) {
         // Found at:
@@ -23,7 +25,7 @@
         // Create the cube from the geometry and the material ...
         var torus = new THREE.Mesh(geometry, materialFactory()); 
 
-	var minorRadius = parseInt(getParams.minorRadius || 25);
+	    var minorRadius = parseInt(getParams.minorRadius || 25);
         var majorRadius = parseInt(getParams.majorRadius || 75);
         var raster      =  parseInt(getParams.raster || 8);
         console.log( 'minorRadius=' + minorRadius + ', majorRadius=' + majorRadius + ', raster=' + raster );
@@ -31,13 +33,13 @@
             new THREE.Vector3( -majorRadius-minorRadius, -majorRadius-minorRadius, -majorRadius-minorRadius ),
             new THREE.Vector3(  majorRadius+minorRadius,  majorRadius+minorRadius,  majorRadius+minorRadius )
         );
-	// Iterate through all {x,y,z} that are possible voxel centers given by the raster
+	    // Iterate through all {x,y,z} that are possible voxel centers given by the raster
         for( var x = bounds.min.x + raster/2; x < bounds.max.x+raster/2; x+= raster ) {
             var xPow = x*x;
             for( var y = bounds.min.y + raster/2; y < bounds.max.y+raster/2; y+= raster ) {
                 var yPow = y*y;
                 for( var z = bounds.min.z + raster/2; z < bounds.max.z+raster/2; z+= raster ) {
-		    // This term is smaller than zero if the point is inside the torus
+		            // This term is smaller than zero if the point is inside the torus
                     if( Math.pow(xPow+yPow+z*z+Math.pow(majorRadius,2)-Math.pow(minorRadius,2),2)-4*Math.pow(majorRadius,2)*(xPow+yPow) > 0 )
                         continue;
                     // Add a voxel at {x,y,z} (a cube)
@@ -47,10 +49,10 @@
                     var voxel = new THREE.Mesh(voxelGeometry, materialFactory()); 
                     voxel.position.set( x, y, z );
 
-		    // Add to the torus
+		            // Add to the torus
                     torus.children.push( voxel );
 
-                    voxelAdded( voxel );
+                    voxelAdded( voxel, torus.children.length-1 );
                 }
             }     
         }
@@ -133,7 +135,7 @@
         // This is the basic render function. It will be called perpetual, again and again,
         // depending on your machines possible frame rate.
         var _self = this;  // workaround for the Safari requestAnimationFrame bug.
-        this._render = function () { 
+        this._render = function ( time ) { 
             // Pass the render function itself
             requestAnimationFrame(_self._render); 
             
@@ -141,11 +143,17 @@
             cube.rotation.x += 0.05; 
             cube.rotation.y += 0.04;
 
+            for( i in tweenPool ) {
+                //console.log( "Tweening " + i );
+                tweenPool[i].update( time );
+            }
+
             _self.renderer.render(_self.scene, _self.camera); 
         }; 
         // Call the rendering function. This will cause and infinite recursion (we want 
         // that here, because the animation shall run forever).
-        this._render();
+        //this._render();
+        requestAnimationFrame(_self._render);
 
 	
 	// Load a texture and use the loade for asyn creating of the torus
@@ -156,22 +164,31 @@
 					    var materialFactory = null;
 					    console.log( window.location.search.indexOf('colors=1') );
 					    if( window.location.search.indexOf('colors=1') != -1 ) 
-						materialFactory = function() { return new THREE.MeshPhongMaterial({color: Math.random()*0xFFFFFF, map : texture}); };
+						  materialFactory = function() { return new THREE.MeshPhongMaterial({color: Math.random()*0xFFFFFF, map : texture}); };
 					    else 
-						materialFactory = function() { return material; }; 
+						  materialFactory = function() { return material; }; 
 					    var domEvents = new THREEx.DomEvents(this.camera, this.renderer.domElement);
 					    
 					    // Compute the torus asynchronously
-					    torus = mkVoxelTorus( materialFactory, function(voxel) {
-						domEvents.addEventListener(voxel, 'mouseover', function(event) {
-						    //console.log('you hover on the mesh');
-						    event.target.scale.set(1.5,1.5,1.5);
-						}, false);
-						domEvents.addEventListener(voxel, 'mouseout', function(event) {
-						    //console.log('you hover off the mesh');
-						    event.target.scale.set(1.0,1.0,1.0);
-						}, false);
-					    } );
+					    torus = mkVoxelTorus( materialFactory, function(voxel,index) {
+    						domEvents.addEventListener(voxel, 'mouseover', function(event) {
+    						    //console.log('you hover on the mesh');
+    						    //event.target.scale.set(1.5,1.5,1.5);
+                                tweenPool.push( new TWEEN.Tween( event.target.scale ).to( { x : 1.5, y : 1.5, z : 1.5 }, 200 ).easing(TWEEN.Easing.Elastic.Out).start() );
+
+    						}, false);
+    						domEvents.addEventListener(voxel, 'mouseout', function(event) {
+    						    //console.log('you hover off the mesh');
+    						    // event.target.scale.set(1.0,1.0,1.0);
+                                //tweenPool.push( new TWEEN.Tween( event.target.scale ).to( { x : 1.0, y : 1.0, z : 1.0 }, 200 ).easing(TWEEN.Easing.Elastic.Out).start() );
+                                tweenPool.push( new TWEEN.Tween( event.target.scale ).to( { x : 0, y : 0, z : 0 }, 200 ).onComplete( function() { torus.remove(event.target); } ).start() );
+                            }, false);
+                            domEvents.addEventListener(voxel, 'click', function(event) {
+                                //console.log('you hover off the mesh');
+                                // event.target.scale.set(1.0,1.0,1.0);
+                                tweenPool.push( new TWEEN.Tween( event.target.scale ).to( { x : 0, y : 0, z : 0 }, 200 ).onComplete( function() { torus.remove(event.target); } ).start() );
+                            }, false);
+    					} );
 					    scene.add( torus );
 					    // Hide overlay
 					    document.getElementById('overlay').style.display = 'none';
