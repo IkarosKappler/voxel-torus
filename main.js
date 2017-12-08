@@ -23,9 +23,10 @@
         // Create the cube from the geometry and the material ...
         var torus = new THREE.Mesh(geometry, materialFactory()); 
 
-	var minorRadius = 25;
-        var majorRadius = 75;
-        var raster      =  8;
+	var minorRadius = parseInt(getParams.minorRadius || 25);
+        var majorRadius = parseInt(getParams.majorRadius || 75);
+        var raster      =  parseInt(getParams.raster || 8);
+        console.log( 'minorRadius=' + minorRadius + ', majorRadius=' + majorRadius + ', raster=' + raster );
         var bounds = new THREE.Box3( 
             new THREE.Vector3( -majorRadius-minorRadius, -majorRadius-minorRadius, -majorRadius-minorRadius ),
             new THREE.Vector3(  majorRadius+minorRadius,  majorRadius+minorRadius,  majorRadius+minorRadius )
